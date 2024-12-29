@@ -1,0 +1,24 @@
+meta {
+  name: Restock
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/restock
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "admin": {
+      "username": "Uncle_Bob_1337",
+      "password": "TomCruiseIsUnder170cm"
+    },
+    "restockOrder": [
+      { "key": "A", "quantity": 5 },
+      { "key": "B", "quantity": 2 }
+    ]
+  }
+}

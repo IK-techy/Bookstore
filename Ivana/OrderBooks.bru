@@ -1,0 +1,20 @@
+meta {
+  name: OrderBooks
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/order
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "listOfBooks": [
+      { "key": "A", "quantity": 5 },
+      { "key": "B", "quantity": 2 }
+    ]
+  }
+}

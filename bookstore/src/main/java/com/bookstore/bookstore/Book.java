@@ -1,11 +1,8 @@
 package com.bookstore.bookstore;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class Book {
     private final String title;
     private final Integer price;
-    @JsonIgnore
     private Integer stock;
 
     public Book(String title, int price, int stock) {
