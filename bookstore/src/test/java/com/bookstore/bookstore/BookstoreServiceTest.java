@@ -45,7 +45,7 @@ public class BookstoreServiceTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody(), "Response body should not be null");
-        assertEquals("Failure, order exceeds $120. Unable to proceed with the order", response.getBody());
+        assertEquals("Failure, order exceeds $120. Unable to proceed with the order", response.getBody().message());
     }
 
     @Test
@@ -58,7 +58,7 @@ public class BookstoreServiceTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody(), "Response body should not be null");
-        assertEquals("Failure, unable to place order", response.getBody());
+        assertEquals("Failure, unable to place order", response.getBody().message());
     }
 
     @Test
