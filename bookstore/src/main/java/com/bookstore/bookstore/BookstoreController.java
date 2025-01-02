@@ -2,6 +2,7 @@ package com.bookstore.bookstore;
 
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,12 +23,12 @@ class BookstoreController {
     }
 
     @PostMapping("/order")
-    public OrderResponse order(@RequestBody OrderRequest orderRequest) {
+    public ResponseEntity<OrderResponse> order(@RequestBody OrderRequest orderRequest) {
         return bookstoreService.placeOrder(orderRequest);
     }
 
     @PostMapping("/restock")
-    public RestockResponse restock(@RequestBody RestockRequest restockRequest) {
+    public ResponseEntity<RestockResponse> restock(@RequestBody RestockRequest restockRequest) {
         return bookstoreService.restock(restockRequest);
     }
 

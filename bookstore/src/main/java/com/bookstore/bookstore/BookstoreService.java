@@ -1,10 +1,13 @@
 package com.bookstore.bookstore;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,7 +23,7 @@ public class BookstoreService {
         stock.put("D", new Book("Limited Collectors Edition", 75, 10));
     }
 
-    public OrderResponse placeOrder(OrderRequest order) {
+    public ResponseEntity<OrderResponse> placeOrder(OrderRequest order) {
 
         int totalOrderCost = 0;
 
@@ -29,13 +32,13 @@ public class BookstoreService {
             Book book = stock.get(bookOrder.key());
 
             if (book == null || book.getStock() == 0 || bookOrder.quantity() > book.getStock()) {
-                return new OrderResponse("Failure, unable to place order", null, 0);
+                return ResponseEntity.badRequest().body(new OrderResponse("Failure, unable to place order", null, 0));
             }
 
             totalOrderCost += bookOrder.quantity() * book.getPrice();
 
             if (totalOrderCost > MAXPURCHASEPRICE) {
-                return new OrderResponse("Failure, order exceeds $120. Unable to proceed with the order", null, 0);
+                return ResponseEntity.badRequest().body(new OrderResponse("Failure, order exceeds $120. Unable to proceed with the order", null, 0));
             }
         }
 
@@ -47,25 +50,35 @@ public class BookstoreService {
                 })
                 .collect(Collectors.toList());
 
-        return new OrderResponse("Success", orderedTitles, totalOrderCost);
+        return ResponseEntity.ok(new OrderResponse("Success", orderedTitles, totalOrderCost));
     }
 
-    public RestockResponse restock(RestockRequest restockRequest) {
+    public ResponseEntity<RestockResponse> restock(RestockRequest restockRequest) {
         if (!BookAdmin.isAdmin(restockRequest.admin().username(), restockRequest.admin().password())) {
-            return new RestockResponse("Failure: Authentication failed");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                new RestockResponse("Failure: Authentication failed"));
         }
-        restockRequest.restockOrder()
-                .forEach(item -> {
-                    Book book = stock.get(item.key());
-                    if (book == null || book.getTitle().equals("Limited Collectors Edition")) {
-                        throw new IllegalArgumentException("Cannot restock book " + item.key());
-                    }
-                    book.setStock(book.getStock() + item.quantity());
-                });
+        
+        List<Map.Entry<Book, Integer>> updates = restockRequest.restockOrder().stream()
+            .map(item -> {
+                Book book = stock.get(item.key());
+                if (book == null || book.getTitle().equals("Limited Collectors Edition")) {
+                    throw new IllegalArgumentException("Cannot restock book " + item.key());
+                }
 
-        return new RestockResponse("Success: Restocked");
+                //NOTE: Should I add restock possibility in multiples of 10? The assignment stated "can" not "should".
 
-        //NOTE: Should I add restock possibility in multiples of 10? 
+                return Map.entry(book, item.quantity());
+            })
+        .toList();
+
+        updates.forEach(entry -> {
+            Book book = entry.getKey();
+            int quantity = entry.getValue();
+            book.setStock(book.getStock() + quantity);
+        });
+
+        return ResponseEntity.ok(new RestockResponse("Success: Restocked"));
 
     }
 
